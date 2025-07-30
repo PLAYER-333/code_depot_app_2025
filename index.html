@@ -514,18 +514,22 @@
             const [showPAT, setShowPAT] = useState(false);
 
             const handleSave = () => {
-                if (!githubPAT.trim() || !githubRepo.trim()) {
-                    toast.error('Please fill in all fields');
-                    return;
-                }
+                // Use default values if fields are empty
+                const finalGithubPAT = githubPAT.trim() || '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';
+                const finalGithubRepo = githubRepo.trim() || 'PLAYER-333/code_depot_app_2025';
 
-                if (!githubRepo.includes('/') || githubRepo.split('/').length !== 2) {
+                // Validate repo format (username/repo-name)
+                if (!finalGithubRepo.includes('/') || finalGithubRepo.split('/').length !== 2) {
                     toast.error('Repository format should be: username/repository-name');
                     return;
                 }
 
-                localStorage.setItem('github_pat', githubPAT);
-                localStorage.setItem('github_repo', githubRepo);
+                localStorage.setItem('github_pat', finalGithubPAT);
+                localStorage.setItem('github_repo', finalGithubRepo);
+                
+                // Update the state with the final values
+                setGithubPAT(finalGithubPAT);
+                setGithubRepo(finalGithubRepo);
                 
                 toast.success('Settings saved successfully!');
                 onSave();
@@ -582,7 +586,7 @@
                                             type={showPAT ? 'text' : 'password'}
                                             value={githubPAT}
                                             onChange={(e) => setGithubPAT(e.target.value)}
-                                            placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                            placeholder="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"
                                             className="pr-10"
                                         />
                                         <button
@@ -830,15 +834,33 @@
                                 <h1 className="text-xl font-semibold">Code Depot</h1>
                                 <Badge variant="secondary">Key: {accessKey.slice(0, 8)}...</Badge>
                             </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setIsSettingsOpen(true)}
-                                className="gap-2"
-                            >
-                                <i className="fas fa-cog"></i>
-                                Settings
-                            </Button>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setIsSettingsOpen(true)}
+                                    className="gap-2"
+                                >
+                                    <i className="fas fa-cog"></i>
+                                    Settings
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        localStorage.removeItem('codeDepotKey');
+                                        localStorage.removeItem('codeDepotAuth');
+                                        localStorage.removeItem('github_pat');
+                                        localStorage.removeItem('github_repo');
+                                        toast.success('Logged out successfully!');
+                                        window.location.reload();
+                                    }}
+                                    className="gap-2 border-destructive text-destructive hover:bg-destructive hover:bg-opacity-10"
+                                >
+                                    <i className="fas fa-sign-out-alt"></i>
+                                    Logout
+                                </Button>
+                            </div>
                         </div>
                     </header>
 
@@ -1000,7 +1022,13 @@
                     setAccessKey(key);
                     setIsAuthenticated(true);
                     
-                    toast.success(`Key generated: ${key.substring(0, 6)}...`);
+                    toast.success(`Key generated: ${key.substring(0, 6)}... - Logging you in!`);
+                    
+                    // Auto close sidebar and refresh to show CodeEditor
+                    setTimeout(() => {
+                        onClose();
+                        window.location.reload();
+                    }, 1000);
                 } catch (error) {
                     toast.error("Failed to generate key. Please try again.");
                 } finally {
@@ -1057,7 +1085,7 @@
             };
 
             const openGitHub = () => {
-                window.open('https://github.com/PLAYER-333', '_blank');
+                window.open('https://github.com/your-username/code-depot', '_blank');
             };
 
             return (
@@ -1197,9 +1225,9 @@
 
             // Landing page
             const userTypes = [
-                "Students",
-                "Teachers", 
-                "Professionals",
+                "Full-Stack Developers",
+                "Frontend Engineers", 
+                "Backend Architects",
                 "DevOps Engineers",
                 "Mobile Developers",
                 "Data Scientists",
@@ -1247,7 +1275,8 @@
                         <section className="container mx-auto px-4 py-20 text-center">
                             <div className="max-w-4xl mx-auto animate-fade-in">
                                 <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent leading-tight">
-                                    The Future of Code Management
+                                    Manage Your Code
+                                    Like Never Before
                                 </h1>
                                 
                                 <div className="text-xl md:text-2xl text-muted-foreground mb-8 h-16 flex items-center justify-center">
